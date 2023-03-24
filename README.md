@@ -45,6 +45,11 @@
 
 ---
 
-- We need to figure out the automated code testing part which the professor wants
+- Build test automation into project [ayman, hemanth]
+- Add HTML code for all the different sections of the site [edward, kyle]
+- Stylize HTML code [edward, kyle]
+- Create logic [ayman, hemanth]
+- Setup supabase DB [edward, kyle]
+- Documentation (unless you guys want to do other things) [alyssa, lam, tahmid]
 
 ---
