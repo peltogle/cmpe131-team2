@@ -43,7 +43,6 @@
 
 ---
 
-## Reminders:
 - We need to figure out the automated code testing part which the professor wants
 
 ---
