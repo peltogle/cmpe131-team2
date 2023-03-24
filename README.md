@@ -20,7 +20,9 @@
 ## Tips
 - Run the server: `python3 flask_folder/app.py`
 - Go to: http://127.0.0.1:5000
-- To deactivate Virtualenv:`deactivate` or `"python.terminal.activateEnvironment": false` in VSCode
+- To deactivate Virtualenv:
+  - Any system: `deactivate`
+  - VSCode users (one-time fix): `"python.terminal.activateEnvironment": false`
 - To turn off Flask server: `CTRL + C`
 - To get the most recent code:
   - `git checkout main`
