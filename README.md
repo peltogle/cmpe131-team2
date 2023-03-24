@@ -22,7 +22,7 @@
 - Go to: http://127.0.0.1:5000
 - To deactivate Virtualenv:
   - Any system: `deactivate`
-  - VSCode users (one-time fix): `"python.terminal.activateEnvironment": false`
+  - VSCode users (one-time fix using settings): `"python.terminal.activateEnvironment": false`
 - To turn off Flask server: `CTRL + C`
 - To get the most recent code:
   - `git checkout main`
