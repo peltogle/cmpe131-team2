@@ -1,5 +1,3 @@
-# CMPE 131 Team 2 Group Project
-
 ## How to setup
 
 - Install Python3: https://www.python.org/
