@@ -1,0 +1,7 @@
+04/16 Sunday
+
+- remove unnecessary information from user table
+- make new payment information table?
+- Lam- edit main page introduction
+- Tadman - work on linking login system with master branch
+- Sessions to replace product_details_table? 
