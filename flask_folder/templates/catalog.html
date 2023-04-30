@@ -9,7 +9,7 @@
   <div class="row row-cols-1 row-cols-md-4 g-4">
     {% for item in response.data %}
     <div class="col">
-      {{ card(item.name, item.image_url, item.description, item.price)}}
+      {{ card(item.name, item.image_url, item.description, item.weight, item.stock, item.price)}}
     </div>
     {% endfor %}
   </div>
