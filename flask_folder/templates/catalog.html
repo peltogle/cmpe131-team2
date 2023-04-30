@@ -1,16 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
+{% from "components.html" import card with context %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> ${name of category} | Catalog</title>
-</head>
+{% extends 'frame.html' %}
 
-<body>
-  <!-- Category view -->
-  <!-- Individual view (side page, not a separate page) -->
-</body>
-
-</html>
+{% block content %}
+<div class="container">
+  <h1>{{ pageTitle }}</h1>
+  <p>Placeholder description of page</p>
+  <div class="row row-cols-1 row-cols-md-4 g-4">
+    {% for item in response.data %}
+    <div class="col">
+      {{ card(item.name, item.image_url, item.description, item.price)}}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
