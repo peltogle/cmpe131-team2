@@ -1,0 +1,20 @@
+{% macro menuLinks() -%}
+<li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'home' }}">Home</a></li>
+<li class="nav-item"><a href="{{ url_for('catalogF') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'fruits' }}">Fruits</a></li>
+<li class="nav-item"><a href="{{ url_for('catalogV') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'vegetables' }}">Vegetables</a></li>
+<li class="nav-item"><a href="{{ url_for('catalogM') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'meats' }}">Meats</a></li>
+<li class="nav-item"><a href="{{ url_for('catalogB') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'beverages' }}">Beverages</a></li>
+{% endmacro -%}
+
+{% macro card(name, image_url, description, price) -%}
+<div class="card h-100">
+    <img src="{{ image_url }}" class="card-img-top">
+    <div class="card-body">
+        <h5 class="card-title">{{ name }}</h5>
+        <p class="card-text">{{ description }}</p>
+    </div>
+    <div class="card-footer">
+        <small class="text-body-secondary">${{ price }}</small>
+    </div>
+</div>
+{% endmacro -%}
