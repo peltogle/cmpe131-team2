@@ -11,12 +11,31 @@
     <img src="{{ image_url }}" class="card-img-top">
     <div class="card-body">
         <h5 class="card-title">{{ name }}</h5>
-        <p class="card-text">{{ description }}
+        <p class="card-text">{{ description }}</p>
+    </div>
+
+    <div class = "align-items-end">
+        <p class="card-body text-end"> 
+            Weight: {{ weight }} lbs
             <br>
-            <br> weight: {{ weight }} lbs
-            <br>
-            <br> Available Stock: {{ stock }}
+            Available Stock: {{ stock }}
         </p>
+        <div class = "row">
+            <span class="col input-group-btn text-end">
+                <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="">
+                <span class="glyphicon glyphicon-minus"></span>
+                </button>
+            </span>
+            <input type="text" id="quantity" name="quantity" class="col form-control input-number" value="10" min="1" max="100">
+            <span class="col input-group-btn">
+                <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
+            </span>
+        </div>
+        <br>
+        <div class = "row justify-content-center"> <button type="button" class="btn btn-primary col-5">Add to Cart</button> </div>
+        <br>
     </div>
     <div class="card-footer">
         <small class="text-body-secondary">${{ price }}</small>
