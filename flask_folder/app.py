@@ -40,6 +40,9 @@ def catalogB():
     supaResponse = supabase.table('catalog').select('*').eq('type', 'beverages').execute()
     return render_template('catalog.html', activePage = "beverages", pageTitle = "Beverages", response = supaResponse)
 
+@app.route('/checkout')
+def indexC():
+    return render_template('checkout.html', activePage = "checkout", pageTitle = "Checkout")
 
 if __name__ == '__main__':
     app.run(host="127.0.0.1", port=5000, debug=True)
