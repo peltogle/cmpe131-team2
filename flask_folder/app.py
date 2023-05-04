@@ -19,30 +19,47 @@ def index():
 
 @app.route('/fruits')
 def catalogF():
+    pageTitle= "Fruits"
+    activePage = "fruits"
+    pageDescription = "Lorem"
     supaResponse = supabase.table('catalog').select('*').eq('type', 'fruits').execute()
-    return render_template('catalog.html', activePage = "fruits", pageTitle = "Fruits", response = supaResponse)
+    return render_template('catalog.html', activePage = activePage, pageTitle = pageTitle, pageDescription = pageDescription, response = supaResponse)
 
 
 @app.route('/vegetables')
 def catalogV():
+    pageTitle= "Vegetables"
+    activePage = "vegetables"
+    pageDescription = "Lorem"
     supaResponse = supabase.table('catalog').select('*').eq('type', 'vegetables').execute()
-    return render_template('catalog.html', activePage = "vegetables", pageTitle = "Vegetables", response = supaResponse)
+    return render_template('catalog.html', activePage = activePage, pageTitle = pageTitle, pageDescription = pageDescription, response = supaResponse)
 
 
 @app.route('/meats')
 def catalogM():
+    pageTitle= "Meats"
+    activePage = "meats"
+    pageDescription = "Lorem"
     supaResponse = supabase.table('catalog').select('*').eq('type', 'meats').execute()
-    return render_template('catalog.html', activePage = "meats", pageTitle = "Meats", response = supaResponse)
+    return render_template('catalog.html', activePage = activePage, pageTitle = pageTitle, pageDescription = pageDescription, response = supaResponse)
 
 
 @app.route('/beverages')
 def catalogB():
+    pageTitle= "Beverages"
+    activePage = "beverages"
+    pageDescription = "Lorem"
     supaResponse = supabase.table('catalog').select('*').eq('type', 'beverages').execute()
-    return render_template('catalog.html', activePage = "beverages", pageTitle = "Beverages", response = supaResponse)
+    return render_template('catalog.html', activePage = activePage, pageTitle = pageTitle, pageDescription = pageDescription, response = supaResponse)
 
 @app.route('/checkout')
-def indexC():
+def checkout():
     return render_template('checkout.html', activePage = "checkout", pageTitle = "Checkout")
+
+@app.route('/signup')
+def signUp():
+    pageDescription = "Welcome! Please fill in the information below to sign up."
+    return render_template('signup.html', activePage = "signup", pageTitle = "Sign Up", pageDescription = pageDescription)
 
 if __name__ == '__main__':
     app.run(host="127.0.0.1", port=5000, debug=True)

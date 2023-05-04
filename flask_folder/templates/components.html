@@ -6,14 +6,12 @@
 <li class="nav-item"><a href="{{ url_for('catalogB') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'beverages' }}">Beverages</a></li>
 {% endmacro -%}
 
-{% macro card(name, image_url, description, weight, stock, price) -%}
+{% macro card(name, image_url, weight, stock, price) -%}
 <div class="card h-100">
-    <img src="{{ image_url }}" class="card-img-top">
+    <img src="{{ image_url }}" class="h-25 card-img-top">
     <div class="card-body">
         <h5 class="card-title">{{ name }}</h5>
-        <p class="card-text">{{ description }}</p>
     </div>
-
     <div class = "align-items-end">
         <p class="card-body text-end"> 
             Weight: {{ weight }} lbs
