@@ -28,6 +28,7 @@
   - `git checkout main`
   - `git pull`
   - `git checkout <your first name>`
+- To update python packages when requirements.txt is changed: `pip install -r requirements.txt --upgrade`
 
 ## Contribute to the repository
 - To upload your code to github:
