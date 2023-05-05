@@ -7,8 +7,8 @@
 {% endmacro -%}
 
 {% macro card(name, image_url, weight, stock, price) -%}
-<div class="card h-100">
-    <img src="{{ image_url }}" class="h-25 card-img-top">
+<div class="card" > <!-- h-100 -->
+    <img src="{{ image_url }}" class="card-img-top">
     <div class="card-body">
         <h5 class="card-title">{{ name }}</h5>
     </div>

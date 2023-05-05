@@ -23,9 +23,13 @@
                 {{ menuLinks() }}
             </ul>
             <div class="col-md-3 text-end">
-                <!-- TODO: fix this -->
-                <a class="btn btn-primary" href="./logIn.html" role="button">Login</a>
-                <a type="button" href="{{ url_for('signUp') }}" class="btn btn-primary">Sign-up</a>
+                {% if activeSession %}
+                <a type="button" class="btn btn-outline-primary me-2" href="{{ url_for('signIn') }}">Log In</a> 
+                <a type="button" class="btn btn-primary" href="{{ url_for('signUp') }}">Sign Up</a>
+                {% else %}
+                <a type="button" class="btn btn-outline-primary me-2">Sign Out</a> 
+                <a type="button" class="btn btn-primary">My Account</a>
+                {% endif %}
             </div>
         </header>
     </div>
@@ -35,8 +39,8 @@
             <ul class="nav justify-content-center border-bottom pb-3 mb-3">
                 {{ menuLinks() }}
             </ul>
-            <p class="text-center text-body-secondary">An educational project created by students in Group 2 of the Spring 2023 CMPE 131 course at SJSU</p>
-            <p class="text-center text-body-secondary">Fair Use Clause: This educational site may contain copyrighted material that has not been specifically authorized by the copyright owner. The use of such material is solely for educational purposes and is considered fair use under copyright law. If you believe that your work has been used in a manner that constitutes copyright infringement, please contact us and we will remove the material immediately upon receipt of proper notification.</p>
+            <p class="text-center text-body-secondary">An educational project created by students in Group 2 of the Spring 2023 CMPE 131 course at SJSU.</p>
+            <p class="text-center text-body-secondary"><b>Fair Use Clause:</b> This educational site may contain copyrighted material that has not been specifically authorized by the copyright owner. The use of such material is solely for educational purposes and is considered fair use under copyright law. If you believe that your work has been used in a manner that constitutes copyright infringement, please contact us and we will remove the material immediately upon receipt of proper notification.</p>
         </footer>
     </div>
 </body>

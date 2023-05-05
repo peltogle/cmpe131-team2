@@ -4,7 +4,7 @@ from supabase import create_client, Client
 
 app = Flask(__name__, static_url_path='', static_folder='static/')
 supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dnRpZ3NwbHBkcHBnd2xrdHBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyMDUwNzMsImV4cCI6MTk5NDc4MTA3M30.S_V8wk3u2hKG5p2XL5TlQfYGwYxzNh488Y7vzz-UTXY")
-
+activeSession = supabase.auth.get_session()
 
 # Global vars
 @app.context_processor
@@ -14,7 +14,12 @@ def inject_globals():
 
 @app.route('/')
 def index():
-    return render_template('index.html', activePage = "home", pageTitle = "Home")
+    if (activeSession == 'None'):
+        noUser = False
+    else:
+        noUser = True
+    # noUser = (activeSession == 'None') ? False : True;
+    return render_template('index.html', activePage = "home", pageTitle = "Home", activeSession = noUser)
 
 
 @app.route('/fruits')
@@ -60,6 +65,11 @@ def checkout():
 def signUp():
     pageDescription = "Welcome! Please fill in the information below to sign up."
     return render_template('signup.html', activePage = "signup", pageTitle = "Sign Up", pageDescription = pageDescription)
+
+@app.route('/signin')
+def signIn():
+    pageDescription = "Welcome! Please fill in the information below to sign in."
+    return render_template('signin.html', activePage = "signin", pageTitle = "Sign In", pageDescription = pageDescription)
 
 if __name__ == '__main__':
     app.run(host="127.0.0.1", port=5000, debug=True)
