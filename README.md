@@ -1,6 +1,5 @@
-# grocery_new
-# Go-Ceries (CMPE 131 Group 3) 
-This is a full-stack eCommerce web application for our CMPE 131 software engineering group project. 
+# ECO MARKET (CMPE 131 Group 2) 
+This is a full-stack eCommerce web application for our CMPE 131 software engineering groups project. 
 
 Group Members: 
 1. Alyssa
@@ -11,13 +10,24 @@ Group Members:
 6. Edward Vong
 7. Tahmid
 
-In order to run our website correctly, user will have to have XAMPP installed in their computer.
+In order to run our website correctly, user will have to have XAMPP/WAMPSEVER64 installed in their computer.
 
 Instructions to run our website:
 
 Setting up:
+First ways :
   1. Download and unzip the folder.
-  2. Place the 'goceries' folder in the {Drive you installed xampp on}/xampp/htdoc directory.
+  2. Place the 'goceries_new' folder into the www files
+  3. Run the WAMPSEVER64 and open the website
+  4. We search on the localhost/phpmyadmin
+  5. then click on SQL and coppy the goceries_updated.sql push to SQL website
+  6. we import the files
+  7. then go to website localhost/goceries_new and click on mainPage.php
+
+
+Second ways :
+  1. Download and unzip the folder.
+  2. Place the 'goceries_new' folder in the {Drive you installed xampp on}/xampp/htdoc directory.
   3. Run the XAMPP control panel (xampp-control.exe) found in xampp director
   4. Start the Apache Server and MYSQL services in XAMPP control panel.
   5. Open any browser, and run localhost/phpMyAdmin.
