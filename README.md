@@ -1,5 +1,5 @@
 # ECO MARKET (CMPE 131 Group 2) 
-This is a full-stack eCommerce web application for our CMPE 131 software engineering groups project. 
+This is a full-stack Food website application for our CMPE 131 software engineering groups project. 
 
 Group Members: 
 1. Alyssa
@@ -15,7 +15,7 @@ In order to run our website correctly, user will have to have XAMPP/WAMPSEVER64 
 Instructions to run our website:
 
 Setting up:
-First ways :
+First ways WAMPSEVER64 :
   1. Download and unzip the folder.
   2. Place the 'goceries_new' folder into the www files
   3. Run the WAMPSEVER64 and open the website
@@ -25,20 +25,20 @@ First ways :
   7. then go to website localhost/goceries_new and click on mainPage.php
 
 
-Second ways :
+Second ways XAMPP :
   1. Download and unzip the folder.
   2. Place the 'goceries_new' folder in the {Drive you installed xampp on}/xampp/htdoc directory.
   3. Run the XAMPP control panel (xampp-control.exe) found in xampp director
   4. Start the Apache Server and MYSQL services in XAMPP control panel.
   5. Open any browser, and run localhost/phpMyAdmin.
   6. IN phpMyAdmin, Create a new database with the "New" Button on the left.
-  7. Name the new database as "goceries" and click Create.
-  8. Select the newly created "goceries" database.
+  7. Name the new database as "goceries_new" and click Create.
+  8. Select the newly created "goceries_new" database.
   8. Click on the "Import" tab at the top.
   9. Choose the 'goceries_final.sql' script and click "Go" to import the database.
   
 Running the Website:
-  1. run localhost/goceries/mainPage.php in any web browser (Recommended: Safari or Chrome).
+  1. run localhost/goceries_new/mainPage.php in any web browser (Recommended: Safari or Chrome).
   2. Refer to the User's Guide for the detailed usage and functionalities of our website. 
   3. Refer to the video walkthrough of the website to understand the entire usage flow, from 
      account sign up to checkout of shopping cart.
