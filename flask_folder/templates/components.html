@@ -1,3 +1,5 @@
+<META NAME="robots" CONTENT="noindex,nofollow">
+
 {% macro menuLinks() -%}
 <li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'home' }}">Home</a></li>
 <li class="nav-item"><a href="{{ url_for('catalogF') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'fruits' }}">Fruits</a></li>
@@ -7,7 +9,7 @@
 {% endmacro -%}
 
 {% macro card(name, image_url, weight, stock, price) -%}
-<div class="card" > <!-- h-100 -->
+<div class="card" >
     <img src="{{ image_url }}" class="card-img-top">
     <div class="card-body">
         <h5 class="card-title">{{ name }}</h5>
@@ -39,4 +41,19 @@
         <small class="text-body-secondary">${{ price }}</small>
     </div>
 </div>
+{% endmacro -%}
+
+{% macro authForm() -%}
+<form method="post">
+    <div class="form-floating mb-3">
+        <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name="userEmailInput" value="{{ request.form['userEmailInput'] }}">
+        <label for="floatingInput">Email address</label>
+    </div>
+    <div class="form-floating">
+        <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="userPasswordInput" value="{{ request.form['userPasswordInput'] }}">
+        <label for="floatingPassword">Password</label>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 {% endmacro -%}

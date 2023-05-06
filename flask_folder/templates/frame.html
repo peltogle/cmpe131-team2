@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <META NAME="robots" CONTENT="noindex,nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ pageTitle }} | Half Foods</title>
     <link rel="shortcut icon" href="{{ green_salad_url }}" type="image/x-icon">
@@ -24,11 +25,11 @@
             </ul>
             <div class="col-md-3 text-end">
                 {% if activeSession %}
-                <a type="button" class="btn btn-outline-primary me-2" href="{{ url_for('signIn') }}">Log In</a> 
-                <a type="button" class="btn btn-primary" href="{{ url_for('signUp') }}">Sign Up</a>
+                    <a type="button" class="btn {{ 'btn-primary' if request.endpoint == 'cart' else 'btn-outline-primary'}} me-2" href="{{ url_for('cart') }}">Cart</a>
+                    <a type="button" class="btn text-primary" href="{{ url_for('signOut') }}">Sign Out</a> 
                 {% else %}
-                <a type="button" class="btn btn-outline-primary me-2">Sign Out</a> 
-                <a type="button" class="btn btn-primary">My Account</a>
+                    <a type="button" class="btn btn-outline-primary me-2" href="{{ url_for('signIn') }}">Log In</a> 
+                    <a type="button" class="btn btn-primary" href="{{ url_for('signUp') }}">Sign Up</a>
                 {% endif %}
             </div>
         </header>
@@ -38,6 +39,9 @@
         <footer class="py-3 my-4">
             <ul class="nav justify-content-center border-bottom pb-3 mb-3">
                 {{ menuLinks() }}
+                {% if activeSession %}
+                    <li class="nav-item"><a class="nav-link px-2 {{ 'link-secondary' if request.endpoint == 'orders' }}" href="{{ url_for('orders') }}">All Orders</a></li>
+                {% endif %}
             </ul>
             <p class="text-center text-body-secondary">An educational project created by students in Group 2 of the Spring 2023 CMPE 131 course at SJSU.</p>
             <p class="text-center text-body-secondary"><b>Fair Use Clause:</b> This educational site may contain copyrighted material that has not been specifically authorized by the copyright owner. The use of such material is solely for educational purposes and is considered fair use under copyright law. If you believe that your work has been used in a manner that constitutes copyright infringement, please contact us and we will remove the material immediately upon receipt of proper notification.</p>

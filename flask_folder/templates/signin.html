@@ -1,0 +1,11 @@
+{% from "components.html" import authForm with context %}
+
+{% extends 'frame.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ pageTitle }}</h1>
+    <p>{{ pageDescription }}</p>
+    {{ authForm() }}
+</div>
+{% endblock %}
