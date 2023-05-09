@@ -32,9 +32,10 @@
     <div class="card-body">
         {% if activeSession %}
         <form method="post" class="text-center">
-            <input type="number" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}">
+            <input type="number" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}" name="quantityNeeded" value="{{ request.form['quantityNeeded'] }}">
+            <input type="hidden" name="itemNeeded" value="{{ itemId }}"></input>
             <br>
-            <button class="btn w-100 btn-primary" type="button">Add to cart</button>
+            <button class="btn w-100 btn-primary" type="submit">Add to cart</button>
         </form>
         {% else %}
         <a type="button" class="btn w-100 btn-primary" href="{{ url_for('signIn') }}">Log in to buy</a>

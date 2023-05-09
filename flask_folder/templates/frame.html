@@ -25,7 +25,9 @@
             </ul>
             <div class="col-md-3 text-end">
                 {% if activeSession %}
-                    <a type="button" class="btn {{ 'btn-primary' if request.endpoint == 'cart' else 'btn-outline-primary'}} me-2" href="{{ url_for('cart') }}">Cart</a>
+                    <a type="button" class="btn {{ 'btn-primary' if request.endpoint == 'cart' else 'btn-outline-primary'}} me-2" href="{{ url_for('cart') }}">
+                        Cart <span class="badge text-bg-danger">{{ itemCount }}</span>
+                    </a>
                     <a type="button" class="btn text-primary" href="{{ url_for('signOut') }}">Sign Out</a> 
                 {% else %}
                     <a type="button" class="btn btn-outline-primary me-2" href="{{ url_for('signIn') }}">Log In</a> 
