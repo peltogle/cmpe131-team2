@@ -6,10 +6,10 @@
 <div class="container">
   <h1>{{ pageTitle }}</h1>
   <p>{{ pageDescription }}</p>
-  <div class="row row-cols-1 row-cols-md-4 g-4">
+  <div class="row row-cols-1 row-cols-md-3 g-4">
     {% for item in response.data %}
     <div class="col">
-      {{ card(item.name, item.image_url, item.weight, item.stock, item.price)}}
+      {{ card(item.name, item.image_url, item.weight, item.stock, item.price, item.bulk, item.item_id)}}
     </div>
     {% endfor %}
   </div>

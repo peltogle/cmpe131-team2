@@ -1,9 +1,9 @@
+import json
 from flask import Flask, render_template, request, url_for, flash, redirect
 from supabase import create_client, Client
 
 app = Flask(__name__, static_url_path='', static_folder='static/')
 supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dnRpZ3NwbHBkcHBnd2xrdHBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyMDUwNzMsImV4cCI6MTk5NDc4MTA3M30.S_V8wk3u2hKG5p2XL5TlQfYGwYxzNh488Y7vzz-UTXY")
-activeSession = supabase.auth.get_session()
 
 # Global vars
 @app.context_processor
@@ -86,7 +86,7 @@ def signIn():
             flash('Email is required!')
         elif not userPassword:
             flash('Password is required!')
-        else:    
+        else:
             supabase.auth.sign_in_with_password({"email": userEmail, "password": userPassword})
             return redirect(url_for('index'))
     pageDescription = "Welcome! Please fill in the information below to sign in."
@@ -111,12 +111,90 @@ def orders():
 
 @app.route('/cart')
 def cart():
-    print(returnActiveSession)
+    userCart = Cart()
     if returnActiveSession:
         pageDescription = "Here is your cart."
-        return render_template('cart.html', activePage = "cart", pageTitle = "Cart", pageDescription = pageDescription, activeSession = returnActiveSession())
+        return render_template('cart.html', 
+                               activePage = "cart", 
+                               pageTitle = "Cart", 
+                               pageDescription = pageDescription, 
+                               activeSession = returnActiveSession(), 
+                               itemCount = userCart.itemCount,
+                               subTotal = userCart.subTotal,
+                               totalCost = userCart.totalCost,
+                               shippingCost = userCart.shippingCost)
     else:
         return redirect(url_for('index'))
+
+
+class Cart:
+    # Class variables
+    subTotal = 0
+    itemCount = 0
+    totalCost = 0
+    shippingCost = False
+    emptyBracket = {}
+    uuid = 0
+    supaResponse = 0
+    items = {}
+
+
+    """ 
+    # start Class constructor
+    #
+    Check if cart entry exists for user, if not, create one
+    If a cart entry exists run countItems, calcShipping, and calcTotal
+    #
+    # end Class constructor
+    """
+    def __init__(self):
+        # Set instance variables
+        self.uuid = supabase.auth.get_session().user.id
+        self.supaResponse = supabase.table('carts').select('*').eq('created_by', self.uuid).limit(1).execute()
+        # Check if a cart entry exists for the user already
+        if self.supaResponse.count is None:
+            supabase.table('carts').insert({'created_by': self.uuid, 'items': self.emptyBracket}).execute()
+        else:
+            self.calcData()
+
+    
+    """ 
+    # start calcData
+    #
+    Calc total items
+    Check weights of all items in cart, it it exceeds 20lb add $5 shipping
+    Calculate total cost of all items in cart plus shipping
+    #
+    # end calcData
+    """
+    def calcData(self):
+        
+        pass
+
+
+    def addItem(self, itemId, quantity):
+        # Check if item already is in cart, if so add the additional quantity to the cart, if not add to cart normally
+        # If the quantity in the cart exceeds stock, trim down to the highest amount that can be ordered and issue error
+        # Recalculate data
+        pass
+
+
+    def removeItem(self, itemId, quantity):
+        # Remove the item and the quantity amount they want to remove, ensure they cannot remove negatives, or go negative items
+        # Recalculate data
+        pass
+
+
+    def clearCart(self):
+        # Remove all items from cart
+        # Recalculate data
+        pass
+
+
+    def placeOrder(self):
+        # Update stock then place order, send order to orders catalog so that user can create a new order, clear cart catalog entry
+        # Redirect to orders page
+        pass
 
 
 if __name__ == '__main__':

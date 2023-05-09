@@ -1,44 +1,44 @@
 <META NAME="robots" CONTENT="noindex,nofollow">
 
 {% macro menuLinks() -%}
-<li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'home' }}">Home</a></li>
-<li class="nav-item"><a href="{{ url_for('catalogF') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'fruits' }}">Fruits</a></li>
-<li class="nav-item"><a href="{{ url_for('catalogV') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'vegetables' }}">Vegetables</a></li>
-<li class="nav-item"><a href="{{ url_for('catalogM') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'meats' }}">Meats</a></li>
-<li class="nav-item"><a href="{{ url_for('catalogB') }}" class="nav-link px-2 {{ 'link-secondary' if activePage == 'beverages' }}">Beverages</a></li>
+<li class="nav-item"><a href="{{ url_for('index') }}"
+        class="nav-link px-2 {{ 'link-secondary' if activePage == 'home' }}">Home</a></li>
+<li class="nav-item"><a href="{{ url_for('catalogF') }}"
+        class="nav-link px-2 {{ 'link-secondary' if activePage == 'fruits' }}">Fruits</a></li>
+<li class="nav-item"><a href="{{ url_for('catalogV') }}"
+        class="nav-link px-2 {{ 'link-secondary' if activePage == 'vegetables' }}">Vegetables</a></li>
+<li class="nav-item"><a href="{{ url_for('catalogM') }}"
+        class="nav-link px-2 {{ 'link-secondary' if activePage == 'meats' }}">Meats</a></li>
+<li class="nav-item"><a href="{{ url_for('catalogB') }}"
+        class="nav-link px-2 {{ 'link-secondary' if activePage == 'beverages' }}">Beverages</a></li>
 {% endmacro -%}
 
-{% macro card(name, image_url, weight, stock, price) -%}
-<div class="card" >
+{% macro card(name, image_url, weight, stock, price, bulk, itemId) -%}
+<div class="card h-100" style="width: 18rem;">
     <img src="{{ image_url }}" class="card-img-top">
     <div class="card-body">
         <h5 class="card-title">{{ name }}</h5>
+        <h4>${{ price }}</h4>
     </div>
-    <div class = "align-items-end">
-        <p class="card-body text-end"> 
-            Weight: {{ weight }} lbs
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item"><b>Shipping Weight:</b> {{ weight }} <i>lbs/unit</i></li>
+        <li class="list-group-item"><b>Quantity Available:</b> {{ stock }}</li>
+        {% if not bulk %}
+        <li class="list-group-item"><b>Note:</b> sold individually</li>
+        {% else %}
+        <li class="list-group-item"><b>Note:</b> sold as a package</li>
+        {% endif %}
+    </ul>
+    <div class="card-body">
+        {% if activeSession %}
+        <form method="post" class="text-center">
+            <input type="number" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}">
             <br>
-            Available Stock: {{ stock }}
-        </p>
-        <div class = "row">
-            <span class="col input-group-btn text-end">
-                <button type="button" class="quantity-left-minus btn btn-danger btn-number"  data-type="minus" data-field="">
-                <span class="glyphicon glyphicon-minus"></span>
-                </button>
-            </span>
-            <input type="text" id="quantity" name="quantity" class="col form-control input-number" value="10" min="1" max="100">
-            <span class="col input-group-btn">
-                <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus" data-field="">
-                    <span class="glyphicon glyphicon-plus"></span>
-                </button>
-            </span>
-        </div>
-        <br>
-        <div class = "row justify-content-center"> <button type="button" class="btn btn-primary col-5">Add to Cart</button> </div>
-        <br>
-    </div>
-    <div class="card-footer">
-        <small class="text-body-secondary">${{ price }}</small>
+            <button class="btn w-100 btn-primary" type="button">Add to cart</button>
+        </form>
+        {% else %}
+        <a type="button" class="btn w-100 btn-primary" href="{{ url_for('signIn') }}">Log in to buy</a>
+        {% endif %}
     </div>
 </div>
 {% endmacro -%}
@@ -46,11 +46,13 @@
 {% macro authForm() -%}
 <form method="post">
     <div class="form-floating mb-3">
-        <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name="userEmailInput" value="{{ request.form['userEmailInput'] }}">
+        <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name="userEmailInput"
+            value="{{ request.form['userEmailInput'] }}">
         <label for="floatingInput">Email address</label>
     </div>
     <div class="form-floating">
-        <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="userPasswordInput" value="{{ request.form['userPasswordInput'] }}">
+        <input type="password" class="form-control" id="floatingPassword" placeholder="Password"
+            name="userPasswordInput" value="{{ request.form['userPasswordInput'] }}">
         <label for="floatingPassword">Password</label>
     </div>
     <br>

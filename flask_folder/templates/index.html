@@ -7,7 +7,11 @@
   <div class="col-lg-6 mx-auto">
     <p class="lead mb-4">Delicious food, delivered to your doorstep</p>
     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-      <a type="button" class="btn btn-primary btn-lg px-4 gap-3" href="{{ url_for('signUp') }}">Sign Up</a>
+      {% if activeSession %}
+        <a type="button" class="btn btn-primary btn-lg px-4 gap-3" href="{{ url_for('orders') }}">All Orders</a>
+      {% else %}
+        <a type="button" class="btn btn-primary btn-lg px-4 gap-3" href="{{ url_for('signUp') }}">Sign Up</a>
+      {% endif %}
     </div>
   </div>
 </div>
