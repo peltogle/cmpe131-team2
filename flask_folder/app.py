@@ -6,6 +6,8 @@ supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co",
                                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dnRpZ3NwbHBkcHBnd2xrdHBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyMDUwNzMsImV4cCI6MTk5NDc4MTA3M30.S_V8wk3u2hKG5p2XL5TlQfYGwYxzNh488Y7vzz-UTXY")
 
 
+# TODO make global cart class to make things more smooth
+
 @app.context_processor
 def inject_globals():
     return {'green_salad_url': 'https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png'}
@@ -62,6 +64,7 @@ def catalogF():
                            itemCount=userCart.itemCount)
 
 
+# TODO: add for all other items
 @app.route('/vegetables')
 def catalogV():
     if returnActiveSession():
@@ -198,11 +201,23 @@ def orders():
         return redirect(url_for('index'))
 
 
-@app.route('/cart')
+@app.route('/cart', methods=('GET', 'POST'))
 def cart():
     if returnActiveSession():
         userCart = Cart()
         pageDescription = "Here is your cart."
+        userItems = []
+        for key in userCart.items:
+            catalogInfo = dict(supabase.table('catalog').select(
+                '*').eq('item_id', key).limit(1).execute())["data"][0]
+            userItems.append(FoodItem(catalogInfo.get("name"), catalogInfo.get(
+                "price"), catalogInfo.get("weight"), userCart.items.get(key), catalogInfo.get("item_id")))
+        if request.method == 'POST':
+            itemId = request.form['itemId']
+        if not itemId:
+            flash('Id is required!')
+        else:
+            userCart.removeItem(itemId)
         return render_template('cart.html',
                                activePage="cart",
                                pageTitle="Cart",
@@ -212,9 +227,24 @@ def cart():
                                subTotal=userCart.subTotal,
                                totalCost=userCart.totalCost,
                                shippingCost=userCart.shippingCost,
-                               items=userCart.items)
+                               userItems=userItems)
     else:
         return redirect(url_for('index'))
+
+
+class FoodItem:
+    itemName = "Name"
+    itemPrice = 0
+    itemWeight = 0
+    itemQuantity = 0
+    itemId = 0
+
+    def __init__(self, itemName, itemPrice, itemWeight, itemQuantity, itemId):
+        self.itemName = itemName
+        self.itemPrice = itemPrice
+        self.itemWeight = itemWeight
+        self.itemQuantity = itemQuantity
+        self.itemId = itemId
 
 
 class FakeCart:
@@ -246,7 +276,7 @@ class Cart:
         self.supaResponse = supabase.table('carts').select(
             '*').eq('created_by', self.uuid).limit(1).execute()
         # Check if a cart entry exists for the user already
-        if False: # TODO: self.supaResponse.count is None
+        if False:  # TODO: self.supaResponse.count is None
             supabase.table('carts').insert(
                 {'created_by': self.uuid, 'items': {}}).execute()
         self.items = dict(supabase.table('carts').select('items').eq(
@@ -286,16 +316,26 @@ class Cart:
             'created_by', self.uuid).execute()
         self.calcData()
 
-
-    def removeItem(self, itemId, quantity):
-        # Remove the item and the quantity amount they want to remove, ensure they cannot remove negatives, or go negative items
-        # Recalculate data
+    """ 
+    # start removeItem
+    #
+    [ ] Remove the item (check if item in list)
+    [ ] Recalculate data
+    #
+    # end removeItem
+    """
+    def removeItem(self, itemId):
         pass
 
-
+    """ 
+    # start placeOrder
+    #
+    [ ] Update stock then place order, send order to orders catalog so that user can create a new order, clear cart catalog entry
+    [ ] Redirect to orders page
+    #
+    # end placeOrder
+    """
     def placeOrder(self):
-        # Update stock then place order, send order to orders catalog so that user can create a new order, clear cart catalog entry
-        # Redirect to orders page
         pass
 
 
