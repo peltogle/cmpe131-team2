@@ -32,8 +32,7 @@
     <div class="card-body">
         {% if activeSession %}
         <form method="post" class="text-center">
-            <input type="number" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}"
-                name="quantityNeeded" value="{{ request.form['quantityNeeded'] }}">
+            <input type="number" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}" name="quantityNeeded">
             <input type="hidden" name="itemNeeded" value="{{ itemId }}"></input>
             <br>
             <button class="btn w-100 btn-primary" type="submit">Add to cart</button>
