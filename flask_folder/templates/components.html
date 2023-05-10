@@ -32,7 +32,8 @@
     <div class="card-body">
         {% if activeSession %}
         <form method="post" class="text-center">
-            <input type="number" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}" name="quantityNeeded" value="{{ request.form['quantityNeeded'] }}">
+            <input type="number" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}"
+                name="quantityNeeded" value="{{ request.form['quantityNeeded'] }}">
             <input type="hidden" name="itemNeeded" value="{{ itemId }}"></input>
             <br>
             <button class="btn w-100 btn-primary" type="submit">Add to cart</button>
@@ -59,4 +60,19 @@
     <br>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+{% endmacro -%}
+
+{% macro cartItem(itemName, itemPrice, itemWeight, itemQuantity, itemId) -%}
+<li class="list-group-item d-flex justify-content-between lh-sm">
+    <div>
+        <h6 class="my-0">{{ itemName }}</h6>
+        <small class="text-body-secondary">{{ itemQuantity }} @ {{ itemWeight }} lb each</small>
+        <br>
+        <form method="post">
+            <input type="hidden" name="itemId" value="{{ itemId }}"></input>
+            <small><a href="" class="link-danger" onclick="this.closest('form').submit();return false;">remove</a></small>
+        </form>
+    </div>
+    <span class="text-body-secondary">${{ itemPrice }}</span>
+</li>
 {% endmacro -%}
