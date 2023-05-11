@@ -35,13 +35,13 @@
     </div>
     <div class="col-md-7 col-lg-8">
       <h4 class="mb-3">Address</h4>
-      <form method="post">
+      <form method="post" id="checkout_form">
         <fieldset {{ 'disabled' if userItems|length==0 }}>
           <div class="row g-3">
             <div class="col-12">
               <div class="form-floating">
                 <input type="text" class="form-control" name="addressInput" maxlength="50" placeholder="Address"
-                  required>
+                  required pattern="^(?! +$)[^\s].*$">
                 <label for="addressInput">Address</label>
               </div>
             </div>
@@ -123,7 +123,7 @@
           <div class="row gy-3">
             <div class="col-md-6">
               <div class="form-floating">
-                <input type="text" class="form-control" name="nameInput" pattern="^[A-Za-z\s]+$" maxlength="50"
+                <input type="text" class="form-control" name="nameInput" pattern="^(?! +$)[A-Za-z\s]+$" maxlength="50"
                   placeholder="Name on card" required>
                 <label for="nameInput">Name on card</label>
               </div>
@@ -137,7 +137,7 @@
             </div>
             <div class="col-md-3">
               <div class="form-floating">
-                <input type="text" class="form-control" name="ccExpirationInput" pattern="(0[1-9]|1[0-2])\/(2[3-9]|[3-9]\d{2})"
+                <input type="text" class="form-control" name="ccExpirationInput" pattern="(0[1-9]|1[0-2])\/(2[4-9]|[3-9]\d{2})"
                   minlength="5" maxlength="5" placeholder="Expiration (MM/YY)" required>
                 <label for="ccExpirationInput">Expiration (MM/YY)</label>
               </div>
@@ -157,4 +157,7 @@
     </div>
   </div>
 </div>
+<script>
+  document.getElementById("checkout_form").reset();
+</script>
 {% endblock %}
