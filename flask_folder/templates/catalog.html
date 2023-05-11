@@ -14,4 +14,12 @@
     {% endfor %}
   </div>
 </div>
+<script>
+  function handleInput(input) {
+    var value = parseInt(input.value);
+    if (isNaN(value) || value % 1 !== 0) {
+      console.log("Lol")
+    }
+  }
+</script>
 {% endblock %}

@@ -24,12 +24,12 @@
               <h6 class="my-0">Shipping cost</h6>
               <small>Shipping cost is added if total weight exceeds 20lb</small>
             </div>
-            <span class="text-success">$5</span>
+            <span class="text-success">$5.00</span>
           </li>
           {% endif %}
           <li class="list-group-item d-flex justify-content-between">
             <span>Total (USD)</span>
-            <strong>${{ totalCost }}</strong>
+            <strong>{{ totalCost }}</strong>
           </li>
         {% endif %}
       </ul>

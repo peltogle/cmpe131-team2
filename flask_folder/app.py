@@ -1,6 +1,8 @@
+import locale
 from flask import Flask, render_template, request, url_for, flash, redirect
 from supabase import create_client, Client
 
+locale.setlocale(locale.LC_ALL, 'en_US')
 app = Flask(__name__, static_url_path='', static_folder='static/')
 supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co",
                                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dnRpZ3NwbHBkcHBnd2xrdHBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyMDUwNzMsImV4cCI6MTk5NDc4MTA3M30.S_V8wk3u2hKG5p2XL5TlQfYGwYxzNh488Y7vzz-UTXY")
@@ -219,11 +221,9 @@ def cart():
                                pageDescription=pageDescription,
                                activeSession=returnActiveSession(),
                                itemCount=userCart.itemCount,
-                               subTotal=userCart.subTotal,
-                               totalCost=userCart.totalCost,
+                               totalCost=userCart.formattedTotalCost,
                                shippingCost=userCart.shippingCost,
                                userItems=userItems)
-    # TODO: remove subtotal
     else:
         return redirect(url_for('index'))
 
@@ -237,7 +237,7 @@ class FoodItem:
 
     def __init__(self, itemName, itemPrice, itemWeight, itemQuantity, itemId):
         self.itemName = itemName
-        self.itemPrice = itemPrice
+        self.itemPrice = locale.currency(itemPrice, grouping=True)
         self.itemWeight = itemWeight
         self.itemQuantity = itemQuantity
         self.itemId = itemId
@@ -249,12 +249,12 @@ class FakeCart:
 
 class Cart:
     # Class variables
-    subTotal = 0
-    itemCount = 0
-    totalCost = 0
-    shippingCost = False
-    uuid = 0
-    supaResponse = 0
+    formattedTotalCost = "NULL" # For the end user
+    itemCount: int = 0
+    totalCost: float = 0
+    shippingCost: bool = False
+    supaResponse = None
+    uuid = None
     items = {}
 
     """ 
@@ -272,8 +272,7 @@ class Cart:
         self.supaResponse = supabase.table('carts').select('*').eq('created_by', self.uuid).limit(1).execute()
         # Check if a cart entry exists for the user already
         if False:  # self.supaResponse.count is None
-            supabase.table('carts').insert(
-                {'created_by': self.uuid, 'items': {}}).execute()
+            supabase.table('carts').insert({'created_by': self.uuid, 'items': {}}).execute()
         self.items = dict(supabase.table('carts').select('items').eq('created_by', self.uuid).limit(1).execute())["data"][0]["items"]
         self.calcData()
 
@@ -288,7 +287,7 @@ class Cart:
     """
 
     def calcData(self):
-        # Calc total items
+        # Calculate total items
         self.itemCount = len(self.items)
         # Check item weights
         totalWeight = 0
@@ -301,7 +300,9 @@ class Cart:
         # Calc total cost plus shipping
         for key in self.items:
             catalogInfo = dict(supabase.table('catalog').select('*').eq('item_id', key).limit(1).execute())["data"][0]
-            self.totalCost += (int(self.items.get(key)) * catalogInfo.get("price"))
+            self.totalCost += float(self.items.get(key)) * float(catalogInfo.get("price"))
+        # Convert into currency
+        self.formattedTotalCost = locale.currency(self.totalCost, grouping=True)
 
 
     """ 
@@ -316,7 +317,7 @@ class Cart:
 
     def addItem(self, itemId, quantity):
         if itemId in self.items:
-            self.items[itemId] += quantity
+            self.items[itemId] = int(self.items[itemId]) + int(quantity)
         else:
             self.items.update({itemId: quantity})
         supabase.table('carts').update({"items": self.items}).eq(
