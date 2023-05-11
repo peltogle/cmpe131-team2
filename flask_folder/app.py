@@ -120,7 +120,7 @@ def catalogB():
                            itemCount=userCart.itemCount)
 
 
-# TODO: fix validation (password length)
+# TODO: fix validation (length, repeat user)
 @app.route('/signup', methods=('GET', 'POST'))
 def signUp():
     if returnActiveSession():
