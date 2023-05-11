@@ -29,7 +29,6 @@ def inject_globals():
 
 
 def fetch_state():
-    print(type(supabase.auth.get_session()))
     if supabase.auth.get_session() is None:
         # Logged out
         session['logged_in'] = False
@@ -280,17 +279,67 @@ def cart():
             userItems.append(FoodItem(catalogInfo.get("name"), catalogInfo.get(
                 "price"), catalogInfo.get("weight"), session['local_items_dic'].get(key), catalogInfo.get("item_id")))
 
+        # Handle remove or checkout
         if request.method == 'POST':
-            itemId = request.form['itemId']
-            if not itemId:
-                flash('Id is required!')
+            """ 
+            # start placeOrder
+            #
+            [ ] TODO: Update stock (both ends) 
+            [-] Place order
+            [-] Move order to orders catalog so that user can create a new order
+            [-] Redirect to orders page
+            #
+            # end placeOrder
+            """
+            if 'make_order' in request.form:
+                addressInput = request.form['addressInput']
+                countryInput = request.form['countryInput']
+                stateInput = request.form['stateInput']
+                zipInput = request.form['zipInput']
+                nameInput = request.form['nameInput']
+                ccNumberInput = request.form['ccNumberInput']
+                ccExpirationInput = request.form['ccExpirationInput']
+                ccCvvInput = request.form['ccCvvInput']
+                if not addressInput:
+                    flash("Address is required!")
+                elif not countryInput:
+                    flash("Country is required!")
+                elif not stateInput:
+                    flash("State is required!")
+                elif not zipInput:
+                    flash("ZIP code is required!")
+                elif not nameInput:
+                    flash("Name on card is required!")
+                elif not ccNumberInput:
+                    flash("Credit card number is required!")
+                elif not ccExpirationInput:
+                    flash("Credit card expiration is required!")
+                elif not ccCvvInput:
+                    flash("CVV is required!")
+                else:
+                    for key in session['local_items_dic']:
+                        catalogInfo = dict(supabase.table('catalog').select('*').eq('item_id', key).limit(1).execute())["data"][0]
+                        if catalogInfo.get("stock") < int(session['local_items_dic'].get(key)):
+                            session['local_items_dic'][key] = catalogInfo.get("stock")
+                        newStockAmount = catalogInfo.get("stock") - int(session['local_items_dic'][key])
+                        supabase.table("catalog").update({"stock": newStockAmount}).eq('item_id', key).execute()
+                    supabase.table('carts').update({"items": session['local_items_dic']}).eq('created_by', session['uid']).execute()
+                    fetch_and_calc_session(session['uid'])
+                    addressInfo = {'address': addressInput, 'country': countryInput, 'state': stateInput, 'zip': zipInput}
+                    ccInfo = {'name': nameInput, 'ccNumber': ccNumberInput, 'ccExpiration': ccExpirationInput, 'ccCvv': ccCvvInput}
+                    supabase.table('orders').insert({'user': session['uid'], 'items': session['local_items_dic'], 'total': session['total_cost'], 'shipping': session['shipping_cost'], 'address': addressInfo, 'cc info': ccInfo}).execute()
+                    supabase.table("carts").delete().eq("created_by", session['uid']).execute()
+                    return redirect(url_for('orders'))
             else:
-                for item in userItems:
-                    if item.itemId == itemId:
-                        userItems.remove(item)
-                removeItem(itemId)
-                return redirect(url_for('cart'))
-
+                itemId = request.form['itemId']
+                if not itemId:
+                    flash('Id is required!')
+                else:
+                    for item in userItems:
+                        if item.itemId == itemId:
+                            userItems.remove(item)
+                    removeItem(itemId)
+                    return redirect(url_for('cart'))
         return render_template('cart.html',
                                activePage="cart",
                                pageTitle="Cart",
@@ -306,23 +355,9 @@ def cart():
 
 # -------------------------------------------------------------------------------------------------
 # TODO: handle bad input of forms (length, repeat user, wrong password, wrong email, etc)
-# TODO: add a banner that confirms user interaction or error (addition, can't add more, etc)
+# TODO: add a banner that confirms user interaction or error (addition, can't add more, order etc)
 # TODO: fix sessions some more to make it better
 # TODO: order page (technically optional)
-
-
-""" 
-# start placeOrder
-#
-[ ] TODO: Update stock then place order, send order to orders catalog so that user can create a new order, clear cart catalog entry
-[ ] TODO: Redirect to orders page
-#
-# end placeOrder
-"""
-
-
-def placeOrder():
-    pass
 
 
 @app.route('/orders')
