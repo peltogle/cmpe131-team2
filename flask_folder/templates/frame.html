@@ -28,10 +28,10 @@
                     <a type="button" class="btn {{ 'btn-primary' if request.endpoint == 'cart' else 'btn-outline-primary'}} me-2" href="{{ url_for('cart') }}">
                         Cart <span class="badge text-bg-danger">{{ itemCount }}</span>
                     </a>
-                    <a type="button" class="btn text-primary" href="{{ url_for('signOut') }}">Sign Out</a> 
+                    <a type="button" class="btn text-primary" href="{{ url_for('auth', type='signout') }}">Sign Out</a> 
                 {% else %}
-                    <a type="button" class="btn btn-outline-primary me-2" href="{{ url_for('signIn') }}">Log In</a> 
-                    <a type="button" class="btn btn-primary" href="{{ url_for('signUp') }}">Sign Up</a>
+                    <a type="button" class="btn btn-outline-primary me-2" href="{{ url_for('auth', type='signin') }}">Log In</a> 
+                    <a type="button" class="btn btn-primary" href="{{ url_for('auth', type='signup') }}">Sign Up</a>
                 {% endif %}
             </div>
         </header>

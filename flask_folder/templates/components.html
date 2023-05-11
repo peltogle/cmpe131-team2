@@ -3,13 +3,13 @@
 {% macro menuLinks() -%}
 <li class="nav-item"><a href="{{ url_for('index') }}"
         class="nav-link px-2 {{ 'link-secondary' if activePage == 'home' }}">Home</a></li>
-<li class="nav-item"><a href="{{ url_for('catalogF') }}"
+<li class="nav-item"><a href="{{ url_for('catalog', category='fruits') }}"
         class="nav-link px-2 {{ 'link-secondary' if activePage == 'fruits' }}">Fruits</a></li>
-<li class="nav-item"><a href="{{ url_for('catalogV') }}"
+<li class="nav-item"><a href="{{ url_for('catalog', category='vegetables') }}"
         class="nav-link px-2 {{ 'link-secondary' if activePage == 'vegetables' }}">Vegetables</a></li>
-<li class="nav-item"><a href="{{ url_for('catalogM') }}"
+<li class="nav-item"><a href="{{ url_for('catalog', category='meats') }}"
         class="nav-link px-2 {{ 'link-secondary' if activePage == 'meats' }}">Meats</a></li>
-<li class="nav-item"><a href="{{ url_for('catalogB') }}"
+<li class="nav-item"><a href="{{ url_for('catalog', category='beverages') }}"
         class="nav-link px-2 {{ 'link-secondary' if activePage == 'beverages' }}">Beverages</a></li>
 {% endmacro -%}
 
@@ -33,14 +33,14 @@
         {% if activeSession %}
         <form method="post" class="text-center">
             <div class="form-floating mb-3">
-                <input type="number" oninput="handleInput(this)" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}" name="quantityNeeded">
+                <input type="number" oninput="handleInput(this)" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}" name="quantityNeeded" required>
                 <label for="floatingInput">Quantity</label>
             </div>
             <input type="hidden" name="itemNeeded" value="{{ itemId }}"></input>
             <button class="btn w-100 btn-primary" type="submit">Add to cart</button>
         </form>
         {% else %}
-        <a type="button" class="btn w-100 btn-primary" href="{{ url_for('signIn') }}">Log in to buy</a>
+        <a type="button" class="btn w-100 btn-primary" href="{{ url_for('auth', type='signin') }}">Log in to buy</a>
         {% endif %}
     </div>
 </div>
@@ -49,13 +49,11 @@
 {% macro authForm() -%}
 <form method="post">
     <div class="form-floating mb-3">
-        <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name="userEmailInput"
-            value="{{ request.form['userEmailInput'] }}" required>
+        <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name="userEmailInput" required>
         <label for="floatingInput">Email address</label>
     </div>
     <div class="form-floating">
-        <input type="password" class="form-control" id="floatingPassword" placeholder="Password"
-            name="userPasswordInput" value="{{ request.form['userPasswordInput'] }}" minlength="6" required>
+        <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="userPasswordInput" minlength="6" required>
         <label for="floatingPassword">Password</label>
     </div>
     <br>

@@ -1,239 +1,266 @@
 import locale
-from flask import Flask, render_template, request, url_for, flash, redirect
 from supabase import create_client, Client
+# IMPROVE: remove unnecessary imports
+from flask import Flask, render_template, flash, redirect, url_for, request, session, make_response
 
-locale.setlocale(locale.LC_ALL,'en_US.UTF-8')
+SUPABASE_URL = "https://yxvtigsplpdppgwlktpn.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dnRpZ3NwbHBkcHBnd2xrdHBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyMDUwNzMsImV4cCI6MTk5NDc4MTA3M30.S_V8wk3u2hKG5p2XL5TlQfYGwYxzNh488Y7vzz-UTXY"
+SALAD_URL = "https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png"
+VERSION = "0.3.0"
+
+# Set locale for float to dollar conversion
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
+# Create Flask app instance
 app = Flask(__name__, static_url_path='', static_folder='static/')
-supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co",
-                                 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dnRpZ3NwbHBkcHBnd2xrdHBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyMDUwNzMsImV4cCI6MTk5NDc4MTA3M30.S_V8wk3u2hKG5p2XL5TlQfYGwYxzNh488Y7vzz-UTXY")
+app.secret_key = SUPABASE_KEY
+
+# Create Supabase app instance
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Inject global variable into each page
+
 
 @app.context_processor
 def inject_globals():
-    return {'green_salad_url': 'https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png', 'version': '0.2.4'}
+    return {'green_salad_url': SALAD_URL, 'version': VERSION}
+
+# Check for user session based on uid
 
 
-def returnActiveSession():
-    if supabase.auth.get_session() is not None:
-        return True
+def fetch_state():
+    print(type(supabase.auth.get_session()))
+    if supabase.auth.get_session() is None:
+        # Logged out
+        session['logged_in'] = False
+        session['item_count'] = 0
+    elif 'uid' in session and session['uid'] == supabase.auth.get_session().user.id:
+        # Logged in with session entry
+        session['logged_in'] = True
+        fetch_and_calc_session(session['uid'])
+    elif 'uid' in session and session['uid'] != supabase.auth.get_session().user.id:
+        # Logged in with session entry but different uid in session
+        session.clear()
+        session['logged_in'] = True
+        session['uid'] = supabase.auth.get_session().user.id
+        fetch_and_calc_session(session['uid'])
     else:
-        return False
+        # Logged in without session entry
+        session['logged_in'] = True
+        session['uid'] = supabase.auth.get_session().user.id
+        fetch_and_calc_session(session['uid'])
+
+# Grab data from database and calculate data based database output
+# IMPROVE: make more lean, can be split into fetch and calc
+
+
+def fetch_and_calc_session(uid):
+    # Database var
+    supaResponse = supabase.table('carts').select(
+        '*').eq('created_by', uid).limit(1).execute()
+
+    # Check database for user cart, if it does not exist, make one and refresh the supaResponse variable
+    if len(dict(supaResponse)["data"]) == 0:
+        supabase.table('carts').insert(
+            {'created_by': uid, 'items': {}}).execute()
+        supaResponse = supabase.table('carts').select(
+            '*').eq('created_by', uid).limit(1).execute()
+        session['shipping_cost'] = False
+        session['total_cost'] = None
+        session['formatted_total_cost'] = None
+        session['local_items_dic'] = {}
+        session['items_count'] = 0
+        return redirect(url_for('index'))
+    else:
+        # Init keys and temp vars for users with a cart already
+        totalWeight: float = 0
+        totalCost: float = 0
+        session['local_items_dic'] = dict(
+            supaResponse)["data"][0]["items"]
+        session['items_count'] = len(session['local_items_dic'])
+
+        # Calc total weight and total cost without shipping
+        for key in session['local_items_dic']:
+            supabaseItemInfo = dict(supabase.table('catalog').select(
+                '*').eq('item_id', key).limit(1).execute())["data"][0]
+            totalWeight += float(supabaseItemInfo.get("weight")) * \
+                float(session['local_items_dic'].get(key))
+            totalCost += float(supabaseItemInfo.get("price")) * \
+                float(session['local_items_dic'].get(key))
+
+        # Calc shipping cost and add to total cost
+        if totalWeight > 20:
+            session['shipping_cost'] = True
+            session['total_cost'] = totalCost + 5
+        else:
+            session['shipping_cost'] = False
+            session['total_cost'] = totalCost
+
+        # Convert into formatted USD currency
+        session['formatted_total_cost'] = locale.currency(
+            session['total_cost'], grouping=True)
+
+
+"""
+# start addItem
+#
+[-] Check if item already is in cart, if so add the additional quantity to the cart, if not add to cart normally
+[-] If the quantity in the cart exceeds stock, trim down to the highest amount that can be ordered and issue error
+[-] Recalculate data
+#
+# end addItem
+"""
+
+
+def addItem(item_id, quantity):
+    if item_id in session['local_items_dic']:
+        potItemCount = int(session['local_items_dic'][item_id]) + int(quantity)
+        totalStock = dict(supabase.table('catalog').select('*').eq('item_id', item_id).limit(1).execute())["data"][0].get("stock")
+        if potItemCount > totalStock:
+            session['local_items_dic'][item_id] = totalStock
+        else:
+            session['local_items_dic'][item_id] = int(session['local_items_dic'][item_id]) + int(quantity)
+    else:
+        session['local_items_dic'][item_id] = quantity
+    supabase.table('carts').update({"items": session['local_items_dic']}).eq(
+        'created_by', session['uid']).execute()
+    fetch_and_calc_session(session['uid'])
+
+
+"""
+# start removeItem
+#
+[-] Remove the item (check if item in list)
+[-] Recalculate data
+#
+# end removeItem
+"""
+
+
+def removeItem(item_id):
+    if item_id not in session['local_items_dic']:
+        flash('item not in list!')
+    else:
+        session['local_items_dic'].pop(item_id)
+    supabase.table('carts').update({"items": session['local_items_dic']}).eq(
+        'created_by', session['uid']).execute()
+    fetch_and_calc_session(session['uid'])
 
 
 @app.route('/')
 def index():
-    if returnActiveSession():
-        userCart = Cart()
-    else:
-        userCart = FakeCart()
+    fetch_state()
+    pageTitle = "Home"
+    activePage = "home"
     return render_template('index.html',
-                           activePage="home",
-                           pageTitle="Home",
-                           activeSession=returnActiveSession(),
-                           itemCount=userCart.itemCount)
-
-
-@app.route('/fruits', methods=('GET', 'POST'))
-def catalogF():
-    if returnActiveSession():
-        userCart = Cart()
-    else:
-        userCart = FakeCart()
-    if request.method == 'POST':
-        # TODO: handle bad input
-        quantityNeeded = request.form['quantityNeeded']
-        itemNeeded = request.form['itemNeeded']
-        if not quantityNeeded:
-            flash('Quantity is required!')
-        elif not itemNeeded:
-            flash('Item is required!')
-        else:
-            userCart.addItem(itemNeeded, quantityNeeded)
-            # TODO: add a banner that says item added
-    pageTitle = "Fruits"
-    activePage = "fruits"
-    pageDescription = "Lorem"
-    supaResponse = supabase.table('catalog').select('*').eq('type', 'fruits').execute()
-    return render_template('catalog.html',
                            activePage=activePage,
                            pageTitle=pageTitle,
-                           pageDescription=pageDescription,
-                           response=supaResponse,
-                           activeSession=returnActiveSession(),
-                           itemCount=userCart.itemCount)
+                           activeSession=session['logged_in'],
+                           itemCount=session['items_count'])
 
 
-# TODO: add for all other items
-@app.route('/vegetables')
-def catalogV():
-    if returnActiveSession():
-        userCart = Cart()
+@app.route('/catalog/<category>', methods=('GET', 'POST'))
+def catalog(category):
+    # List of available categories
+    categories = ['fruits', 'vegetables', 'meats', 'beverages']
+
+    # Check which category it is and reject non-existent ones
+    if category not in categories:
+        # Handle unknown categories
+        return "Invalid category"
     else:
-        userCart = FakeCart()
-    pageTitle = "Vegetables"
-    activePage = "vegetables"
-    pageDescription = "Lorem"
-    supaResponse = supabase.table('catalog').select('*').eq('type', 'vegetables').execute()
-    return render_template('catalog.html',
-                           activePage=activePage,
-                           pageTitle=pageTitle,
-                           pageDescription=pageDescription,
-                           response=supaResponse,
-                           activeSession=returnActiveSession(),
-                           itemCount=userCart.itemCount)
+        fetch_state()
+        if category == 'fruits':
+            pageDescription = "Explore a vibrant assortment of fresh and juicy fruits to add a burst of flavor and nutrition to your meals."
+        elif category == 'vegetables':
+            pageDescription = "Discover a colorful selection of farm-fresh vegetables packed with vitamins and minerals for wholesome cooking and healthy eating."
+        elif category == 'meats':
+            pageDescription = "Indulge in a variety of high-quality meats, including tender cuts and flavorful options, to create savory dishes that satisfy every palate."
+        elif category == 'beverages':
+            pageDescription = "Quench your thirst with a wide range of refreshing beverages, from revitalizing juices to energizing drinks, perfect for any occasion."
 
-
-@app.route('/meats')
-def catalogM():
-    if returnActiveSession():
-        userCart = Cart()
-    else:
-        userCart = FakeCart()
-    pageTitle = "Meats"
-    activePage = "meats"
-    pageDescription = "Lorem"
-    supaResponse = supabase.table('catalog').select('*').eq('type', 'meats').execute()
-    return render_template('catalog.html',
-                           activePage=activePage,
-                           pageTitle=pageTitle,
-                           pageDescription=pageDescription,
-                           response=supaResponse,
-                           activeSession=returnActiveSession(),
-                           itemCount=userCart.itemCount)
-
-
-@app.route('/beverages')
-def catalogB():
-    if returnActiveSession():
-        userCart = Cart()
-    else:
-        userCart = FakeCart()
-    pageTitle = "Beverages"
-    activePage = "beverages"
-    pageDescription = "Lorem"
-    supaResponse = supabase.table('catalog').select('*').eq('type', 'beverages').execute()
-    return render_template('catalog.html',
-                           activePage=activePage,
-                           pageTitle=pageTitle,
-                           pageDescription=pageDescription,
-                           response=supaResponse,
-                           activeSession=returnActiveSession(),
-                           itemCount=userCart.itemCount)
-
-# TODO: enable all the other catagories
-# TODO: fix validation (length, repeat user)
-@app.route('/signup', methods=('GET', 'POST'))
-def signUp():
-    if returnActiveSession():
-        userCart = Cart()
-    else:
-        userCart = FakeCart()
-    if request.method == 'POST':
-        userEmail = request.form['userEmailInput']
-        userPassword = request.form['userPasswordInput']
-        if not userEmail:
-            flash('Email is required!')
-        elif not userPassword:
-            flash('Password is required!')
-        else:
-            supabase.auth.sign_up(
-                {"email": userEmail, "password": userPassword})
-            return redirect(url_for('index'))
-    pageDescription = "Welcome! Please fill in the information below to sign up."
-    return render_template('signup.html',
-                           activePage="signup",
-                           pageTitle="Sign Up",
-                           pageDescription=pageDescription,
-                           activeSession=returnActiveSession(),
-                           itemCount=userCart.itemCount)
-
-
-@app.route('/signin', methods=('GET', 'POST'))
-def signIn():
-    if returnActiveSession():
-        userCart = Cart()
-    else:
-        userCart = FakeCart()
-    if request.method == 'POST':
-        userEmail = request.form['userEmailInput']
-        userPassword = request.form['userPasswordInput']
-        if not userEmail:
-            flash('Email is required!')
-        elif not userPassword:
-            flash('Password is required!')
-        else:
-            supabase.auth.sign_in_with_password(
-                {"email": userEmail, "password": userPassword})
-            return redirect(url_for('index'))
-    pageDescription = "Welcome! Please fill in the information below to sign in."
-    return render_template('signin.html',
-                           activePage="signin",
-                           pageTitle="Sign In",
-                           pageDescription=pageDescription,
-                           activeSession=returnActiveSession(),
-                           itemCount=userCart.itemCount)
-
-
-@app.route('/signout')
-def signOut():
-    supabase.auth.sign_out()
-    return redirect(url_for('index'))
-
-
-@app.route('/orders')
-def orders():
-    if returnActiveSession():
-        userCart = Cart()
-        pageDescription = "Here are all the orders."
-        return render_template('orders.html',
-                               activePage="orders",
-                               pageTitle="All Orders",
-                               pageDescription=pageDescription,
-                               activeSession=returnActiveSession(),
-                               itemCount=userCart.itemCount)
-    else:
-        return redirect(url_for('index'))
-
-
-@app.route('/cart', methods=('GET', 'POST'))
-def cart():
-    if returnActiveSession():
-        userCart = Cart()
-        pageDescription = "Here is your cart."
-        userItems = []
-        for key in userCart.items:
-            catalogInfo = dict(supabase.table('catalog').select('*').eq('item_id', key).limit(1).execute())["data"][0]
-            userItems.append(FoodItem(catalogInfo.get("name"), catalogInfo.get(
-                "price"), catalogInfo.get("weight"), userCart.items.get(key), catalogInfo.get("item_id")))
+        # Handle adding item to cart
         if request.method == 'POST':
-            itemId = request.form['itemId']
-            if not itemId:
-                flash('Id is required!')
+            quantityNeeded = request.form['quantityNeeded']
+            itemNeeded = request.form['itemNeeded']
+            if not quantityNeeded:
+                flash('Quantity is required!')
+            elif not itemNeeded:
+                flash('Item is required!')
             else:
-                for item in userItems:
-                    if item.itemId == itemId:
-                        userItems.remove(item)
-                userCart.removeItem(itemId)
-                return redirect(url_for('cart'))
-        return render_template('cart.html',
-                               activePage="cart",
-                               pageTitle="Cart",
+                addItem(itemNeeded, quantityNeeded)
+                # TODO: add a banner that says item added
+
+        # Pull catalog from database
+        supaResponse = supabase.table('catalog').select(
+            '*').eq('type', f'{category}').execute()
+        return render_template('catalog.html',
+                               activePage=category,
+                               pageTitle=category.capitalize(),
                                pageDescription=pageDescription,
-                               activeSession=returnActiveSession(),
-                               itemCount=userCart.itemCount,
-                               totalCost=userCart.formattedTotalCost,
-                               shippingCost=userCart.shippingCost,
-                               userItems=userItems)
+                               response=supaResponse,
+                               activeSession=session['logged_in'],
+                               itemCount=session['items_count'])
+
+
+@app.route('/auth/<type>', methods=('GET', 'POST'))
+def auth(type):
+    # List of available types
+    types = ['signin', 'signup', 'signout']
+
+    # Check which category it is and reject non-existent ones
+    if type not in types:
+        # Handle unknown types
+        return "Invalid authentication method"
+    elif not session['logged_in']:
+        fetch_state()
+        if type == 'signin':
+            pageTitle = "Sign In"
+            pageDescription = "Welcome! Please fill in the information below to sign in."
+        elif type == 'signup':
+            pageTitle = "Sign Up"
+            pageDescription = "Welcome! Please fill in the information below to sign up."
+        elif type == 'signout':
+            supabase.auth.sign_out()
+            fetch_state()
+            return redirect(url_for('index'))
+
+        # Handle form request
+        if request.method == 'POST':
+            userEmail = request.form['userEmailInput']
+            userPassword = request.form['userPasswordInput']
+            if not userEmail:
+                flash('Email is required!')
+            elif not userPassword:
+                flash('Password is required!')
+            elif type == 'signup':
+                supabase.auth.sign_up(
+                    {"email": userEmail, "password": userPassword})
+                fetch_state()
+                return redirect(url_for('index'))
+            else:
+                supabase.auth.sign_in_with_password(
+                    {"email": userEmail, "password": userPassword})
+                fetch_state()
+                return redirect(url_for('index'))
+
+        return render_template('auth.html',
+                               activePage=type,
+                               pageTitle=pageTitle,
+                               pageDescription=pageDescription,
+                               activeSession=session['logged_in'])
     else:
         return redirect(url_for('index'))
+
+# A class to help display items in the cart on the cart page
 
 
 class FoodItem:
-    itemName = "Name"
-    itemPrice = 0
-    itemWeight = 0
-    itemQuantity = 0
-    itemId = 0
+    # Init variables
+    itemName = None
+    itemPrice = itemWeight = itemQuantity = itemId = 0
 
+    # Constructor
     def __init__(self, itemName, itemPrice, itemWeight, itemQuantity, itemId):
         self.itemName = itemName
         self.itemPrice = locale.currency(itemPrice, grouping=True)
@@ -242,118 +269,80 @@ class FoodItem:
         self.itemId = itemId
 
 
-class FakeCart:
-    itemCount = 0
+@app.route('/cart', methods=('GET', 'POST'))
+def cart():
+    if session['logged_in']:
+        pageDescription = "Here is your cart."
+        userItems = []
+        for key in session['local_items_dic']:
+            catalogInfo = dict(supabase.table('catalog').select(
+                '*').eq('item_id', key).limit(1).execute())["data"][0]
+            userItems.append(FoodItem(catalogInfo.get("name"), catalogInfo.get(
+                "price"), catalogInfo.get("weight"), session['local_items_dic'].get(key), catalogInfo.get("item_id")))
+
+        if request.method == 'POST':
+            itemId = request.form['itemId']
+            if not itemId:
+                flash('Id is required!')
+            else:
+                for item in userItems:
+                    if item.itemId == itemId:
+                        userItems.remove(item)
+                removeItem(itemId)
+                return redirect(url_for('cart'))
+
+        return render_template('cart.html',
+                               activePage="cart",
+                               pageTitle="Cart",
+                               pageDescription=pageDescription,
+                               activeSession=session['logged_in'],
+                               itemCount=session['items_count'],
+                               totalCost=session['formatted_total_cost'],
+                               shippingCost=session['shipping_cost'],
+                               userItems=userItems)
+    else:
+        return redirect(url_for('index'))
 
 
-class Cart:
-    # Class variables
-    formattedTotalCost = "NULL" # For the end user
-    itemCount: int = 0
-    totalCost: float = 0
-    shippingCost: bool = False
-    supaResponse = None
-    uuid = None
-    items = {}
+# -------------------------------------------------------------------------------------------------
+# TODO: handle bad input of forms (length, repeat user, wrong password, wrong email, etc)
+# TODO: add a banner that confirms user interaction or error (addition, can't add more, etc)
+# TODO: fix sessions some more to make it better
+# TODO: order page (technically optional)
 
 
-    """ 
-    # start Class constructor
-    #
-    [ ] TODO: Check if cart entry exists for user, if not, create one
-    [-] If a cart entry exists run countItems, calcShipping, and calcTotal
-    #
-    # end Class constructor
-    """
-
-    def __init__(self):
-        # Set instance variables
-        self.uuid = supabase.auth.get_session().user.id
-        self.supaResponse = supabase.table('carts').select('*').eq('created_by', self.uuid).limit(1).execute()
-        # Check if a cart entry exists for the user already
-        print(len(dict(self.supaResponse)["data"]))
-        if len(dict(self.supaResponse)["data"]) == 0:
-            supabase.table('carts').insert({'created_by': self.uuid, 'items': {}}).execute()
-        self.items = dict(supabase.table('carts').select('items').eq('created_by', self.uuid).limit(1).execute())["data"][0]["items"]
-        self.calcData()
-
-    """ 
-    # start calcData
-    #
-    [-] Calc total items
-    [-] Check weights of all items in cart, it it exceeds 20lb add $5 shipping
-    [-] Calculate total cost of all items in cart plus shipping
-    #
-    # end calcData
-    """
-
-    def calcData(self):
-        # Calculate total items
-        self.itemCount = len(self.items)
-        # Check item weights
-        totalWeight = 0
-        for key in self.items:
-            catalogInfo = dict(supabase.table('catalog').select('*').eq('item_id', key).limit(1).execute())["data"][0]
-            totalWeight += (catalogInfo.get("weight") * int(self.items.get(key)))
-        if totalWeight >= 20:
-            self.shippingCost = True
-            self.totalCost += 5
-        # Calc total cost plus shipping
-        for key in self.items:
-            catalogInfo = dict(supabase.table('catalog').select('*').eq('item_id', key).limit(1).execute())["data"][0]
-            self.totalCost += float(self.items.get(key)) * float(catalogInfo.get("price"))
-        # Convert into currency
-        self.formattedTotalCost = locale.currency(self.totalCost, grouping=True)
+""" 
+# start placeOrder
+#
+[ ] TODO: Update stock then place order, send order to orders catalog so that user can create a new order, clear cart catalog entry
+[ ] TODO: Redirect to orders page
+#
+# end placeOrder
+"""
 
 
-    """ 
-    # start addItem
-    #
-    [-] Check if item already is in cart, if so add the additional quantity to the cart, if not add to cart normally
-    [ ] TODO: If the quantity in the cart exceeds stock, trim down to the highest amount that can be ordered and issue error
-    [-] Recalculate data
-    #
-    # end addItem
-    """
+def placeOrder():
+    pass
 
-    def addItem(self, itemId, quantity):
-        if itemId in self.items:
-            self.items[itemId] = int(self.items[itemId]) + int(quantity)
-        else:
-            self.items.update({itemId: quantity})
-        supabase.table('carts').update({"items": self.items}).eq(
-            'created_by', self.uuid).execute()
-        self.calcData()
 
-    """ 
-    # start removeItem
-    #
-    [-] Remove the item (check if item in list)
-    [-] Recalculate data
-    #
-    # end removeItem
-    """
-    def removeItem(self, itemId):
-        if itemId not in self.items:
-            flash('item not in list!')
-        else:
-            self.items.pop(itemId)
-        supabase.table('carts').update({"items": self.items}).eq(
-            'created_by', self.uuid).execute()  
-        self.calcData()
+@app.route('/orders')
+def orders():
+    if fetch_state():
+        userCart = Cart()
+        pageDescription = "Here are all the orders."
+        return render_template('orders.html',
+                               activePage="orders",
+                               pageTitle="All Orders",
+                               pageDescription=pageDescription,
+                               activeSession=fetch_state(),
+                               itemCount=userCart.itemCount)
+    else:
+        return redirect(url_for('index'))
 
-    """ 
-    # start placeOrder
-    #
-    [ ] TODO: Update stock then place order, send order to orders catalog so that user can create a new order, clear cart catalog entry
-    [ ] TODO: Redirect to orders page
-    #
-    # end placeOrder
-    """
-    def placeOrder(self):
-        pass
+
+# -------------------------------------------------------------------------------------------------
 
 
 if __name__ == '__main__':
     app.run(host="127.0.0.1", port=5000, debug=True)
-    # TODO: remove debug
+    # IMPROVE: remove debug in production if it doesn't do it already
