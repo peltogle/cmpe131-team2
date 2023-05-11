@@ -19,9 +19,10 @@ app.secret_key = SUPABASE_KEY
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # -------------------------------------------------------------------------------------------------
+# TODO: fix sessions some more to make experience better
 # TODO: handle bad input of forms (length, repeat user, wrong password, wrong email, etc)
 # TODO: add a banner that confirms user interaction or error (addition, can't add more, order etc)
-# TODO: fix sessions some more to make it better
+
 # TODO: order page (technically optional)
 
 
@@ -58,7 +59,7 @@ def fetch_state():
         print("case 1")
         # Logged out
         session['logged_in'] = False
-        session['item_count'] = 0
+        session['items_count'] = 0
     elif 'uid' in session and session['uid'] == supabase.auth.get_session().user.id:
         print("case 2")
         # Logged in with session entry
