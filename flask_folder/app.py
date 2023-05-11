@@ -6,7 +6,7 @@ from flask import Flask, render_template, flash, redirect, url_for, request, ses
 SUPABASE_URL = "https://yxvtigsplpdppgwlktpn.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dnRpZ3NwbHBkcHBnd2xrdHBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyMDUwNzMsImV4cCI6MTk5NDc4MTA3M30.S_V8wk3u2hKG5p2XL5TlQfYGwYxzNh488Y7vzz-UTXY"
 SALAD_URL = "https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png"
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 
 # Set locale for float to dollar conversion
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
@@ -19,10 +19,8 @@ app.secret_key = SUPABASE_KEY
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # -------------------------------------------------------------------------------------------------
-# TODO: fix sessions some more to make experience better
 # TODO: handle bad input of forms (length, repeat user, wrong password, wrong email, etc)
 # TODO: add a banner that confirms user interaction or error (addition, can't add more, order etc)
-
 # TODO: order page (technically optional)
 
 
