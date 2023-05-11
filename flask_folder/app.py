@@ -119,7 +119,7 @@ def catalogB():
                            activeSession=returnActiveSession(),
                            itemCount=userCart.itemCount)
 
-
+# TODO: enable all the other catagories
 # TODO: fix validation (length, repeat user)
 @app.route('/signup', methods=('GET', 'POST'))
 def signUp():
