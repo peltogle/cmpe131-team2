@@ -2,7 +2,7 @@ import locale
 from flask import Flask, render_template, request, url_for, flash, redirect
 from supabase import create_client, Client
 
-locale.setlocale(locale.LC_ALL, 'en_US')
+locale.setlocale(locale.LC_ALL,'en_US.UTF-8')
 app = Flask(__name__, static_url_path='', static_folder='static/')
 supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co",
                                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dnRpZ3NwbHBkcHBnd2xrdHBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyMDUwNzMsImV4cCI6MTk5NDc4MTA3M30.S_V8wk3u2hKG5p2XL5TlQfYGwYxzNh488Y7vzz-UTXY")
