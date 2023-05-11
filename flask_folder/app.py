@@ -54,30 +54,17 @@ def inject_globals():
 
 
 def fetch_state():
-    print(supabase.auth.get_session())
-    if supabase.auth.get_session() is None:
-        print("case 1")
-        # Logged out
-        session['logged_in'] = False
-        session['items_count'] = 0
-    elif 'uid' in session and session['uid'] == supabase.auth.get_session().user.id:
-        print("case 2")
-        # Logged in with session entry
+    if 'uid' in session:
+        print("SIGNED IN")
+        # Logged in
         session['logged_in'] = True
-        fetch_and_calc_session(session['uid'])
-    elif 'uid' in session and session['uid'] != supabase.auth.get_session().user.id:
-        # Logged in with session entry but different uid in session
-        print("case 3")
-        session.clear()
-        session['logged_in'] = True
-        session['uid'] = supabase.auth.get_session().user.id
         fetch_and_calc_session(session['uid'])
     else:
-        # Logged in without session entry
-        print("case 4")
-        session['logged_in'] = True
-        session['uid'] = supabase.auth.get_session().user.id
-        fetch_and_calc_session(session['uid'])
+        print("SIGNED OUT")
+        # Logged out
+        session.clear()
+        session['logged_in'] = False
+        session['items_count'] = 0
 
 # Grab data from database and calculate data based database output
 # IMPROVE: make more lean, can be split into fetch and calc
@@ -250,7 +237,8 @@ def auth(type):
             pageTitle = "Sign Up"
             pageDescription = "Welcome! Please fill in the information below to sign up."
         elif type == 'signout':
-            supabase.auth.sign_out()
+            print("HERE T")
+            session.pop('uid')
             fetch_state()
             return redirect(url_for('index'))
 
@@ -265,12 +253,16 @@ def auth(type):
             elif type == 'signup':
                 supabase.auth.sign_up(
                     {"email": userEmail, "password": userPassword})
+                session['uid'] = supabase.auth.get_session().user.id
                 fetch_state()
+                supabase.auth.sign_out()
                 return redirect(url_for('index'))
             else:
                 supabase.auth.sign_in_with_password(
                     {"email": userEmail, "password": userPassword})
+                session['uid'] = supabase.auth.get_session().user.id
                 fetch_state()
+                supabase.auth.sign_out()
                 return redirect(url_for('index'))
 
         return render_template('auth.html',
