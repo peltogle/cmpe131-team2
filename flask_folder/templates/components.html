@@ -50,12 +50,12 @@
 <form method="post">
     <div class="form-floating mb-3">
         <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name="userEmailInput"
-            value="{{ request.form['userEmailInput'] }}">
+            value="{{ request.form['userEmailInput'] }}" required>
         <label for="floatingInput">Email address</label>
     </div>
     <div class="form-floating">
         <input type="password" class="form-control" id="floatingPassword" placeholder="Password"
-            name="userPasswordInput" value="{{ request.form['userPasswordInput'] }}">
+            name="userPasswordInput" value="{{ request.form['userPasswordInput'] }}" minlength="6" required>
         <label for="floatingPassword">Password</label>
     </div>
     <br>

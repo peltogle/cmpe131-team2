@@ -9,7 +9,7 @@ supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co",
 
 @app.context_processor
 def inject_globals():
-    return {'green_salad_url': 'https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png'}
+    return {'green_salad_url': 'https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png', 'version': '0.2.2'}
 
 
 def returnActiveSession():
