@@ -9,7 +9,7 @@ supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co",
 
 @app.context_processor
 def inject_globals():
-    return {'green_salad_url': 'https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png', 'version': '0.2.3'}
+    return {'green_salad_url': 'https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png', 'version': '0.2.4'}
 
 
 def returnActiveSession():
@@ -271,7 +271,8 @@ class Cart:
         self.uuid = supabase.auth.get_session().user.id
         self.supaResponse = supabase.table('carts').select('*').eq('created_by', self.uuid).limit(1).execute()
         # Check if a cart entry exists for the user already
-        if len(dict(self.supaResponse)["data"]) is 0:
+        print(len(dict(self.supaResponse)["data"]))
+        if len(dict(self.supaResponse)["data"]) == 0:
             supabase.table('carts').insert({'created_by': self.uuid, 'items': {}}).execute()
         self.items = dict(supabase.table('carts').select('items').eq('created_by', self.uuid).limit(1).execute())["data"][0]["items"]
         self.calcData()
