@@ -5,7 +5,6 @@ app = Flask(__name__, static_url_path='', static_folder='static/')
 supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co",
                                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dnRpZ3NwbHBkcHBnd2xrdHBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzkyMDUwNzMsImV4cCI6MTk5NDc4MTA3M30.S_V8wk3u2hKG5p2XL5TlQfYGwYxzNh488Y7vzz-UTXY")
 
-
 @app.context_processor
 def inject_globals():
     return {'green_salad_url': 'https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png'}
@@ -51,8 +50,7 @@ def catalogF():
     pageTitle = "Fruits"
     activePage = "fruits"
     pageDescription = "Lorem"
-    supaResponse = supabase.table('catalog').select(
-        '*').eq('type', 'fruits').execute()
+    supaResponse = supabase.table('catalog').select('*').eq('type', 'fruits').execute()
     return render_template('catalog.html',
                            activePage=activePage,
                            pageTitle=pageTitle,
@@ -72,8 +70,7 @@ def catalogV():
     pageTitle = "Vegetables"
     activePage = "vegetables"
     pageDescription = "Lorem"
-    supaResponse = supabase.table('catalog').select(
-        '*').eq('type', 'vegetables').execute()
+    supaResponse = supabase.table('catalog').select('*').eq('type', 'vegetables').execute()
     return render_template('catalog.html',
                            activePage=activePage,
                            pageTitle=pageTitle,
@@ -92,8 +89,7 @@ def catalogM():
     pageTitle = "Meats"
     activePage = "meats"
     pageDescription = "Lorem"
-    supaResponse = supabase.table('catalog').select(
-        '*').eq('type', 'meats').execute()
+    supaResponse = supabase.table('catalog').select('*').eq('type', 'meats').execute()
     return render_template('catalog.html',
                            activePage=activePage,
                            pageTitle=pageTitle,
@@ -112,8 +108,7 @@ def catalogB():
     pageTitle = "Beverages"
     activePage = "beverages"
     pageDescription = "Lorem"
-    supaResponse = supabase.table('catalog').select(
-        '*').eq('type', 'beverages').execute()
+    supaResponse = supabase.table('catalog').select('*').eq('type', 'beverages').execute()
     return render_template('catalog.html',
                            activePage=activePage,
                            pageTitle=pageTitle,
@@ -205,8 +200,7 @@ def cart():
         pageDescription = "Here is your cart."
         userItems = []
         for key in userCart.items:
-            catalogInfo = dict(supabase.table('catalog').select(
-                '*').eq('item_id', key).limit(1).execute())["data"][0]
+            catalogInfo = dict(supabase.table('catalog').select('*').eq('item_id', key).limit(1).execute())["data"][0]
             userItems.append(FoodItem(catalogInfo.get("name"), catalogInfo.get(
                 "price"), catalogInfo.get("weight"), userCart.items.get(key), catalogInfo.get("item_id")))
         if request.method == 'POST':
@@ -275,14 +269,12 @@ class Cart:
     def __init__(self):
         # Set instance variables
         self.uuid = supabase.auth.get_session().user.id
-        self.supaResponse = supabase.table('carts').select(
-            '*').eq('created_by', self.uuid).limit(1).execute()
+        self.supaResponse = supabase.table('carts').select('*').eq('created_by', self.uuid).limit(1).execute()
         # Check if a cart entry exists for the user already
         if False:  # self.supaResponse.count is None
             supabase.table('carts').insert(
                 {'created_by': self.uuid, 'items': {}}).execute()
-        self.items = dict(supabase.table('carts').select('items').eq(
-            'created_by', self.uuid).limit(1).execute())["data"][0]["items"]
+        self.items = dict(supabase.table('carts').select('items').eq('created_by', self.uuid).limit(1).execute())["data"][0]["items"]
         self.calcData()
 
     """ 
