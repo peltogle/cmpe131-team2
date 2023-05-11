@@ -55,12 +55,10 @@ def inject_globals():
 
 def fetch_state():
     if 'uid' in session:
-        print("SIGNED IN")
         # Logged in
         session['logged_in'] = True
         fetch_and_calc_session(session['uid'])
     else:
-        print("SIGNED OUT")
         # Logged out
         session.clear()
         session['logged_in'] = False
@@ -228,6 +226,10 @@ def auth(type):
     if type not in types:
         # Handle unknown types
         return "Invalid authentication method"
+    elif type == 'signout' and session['logged_in']:
+        session.pop('uid')
+        fetch_state()
+        return redirect(url_for('index'))
     elif not session['logged_in']:
         fetch_state()
         if type == 'signin':
@@ -236,12 +238,7 @@ def auth(type):
         elif type == 'signup':
             pageTitle = "Sign Up"
             pageDescription = "Welcome! Please fill in the information below to sign up."
-        elif type == 'signout':
-            print("HERE T")
-            session.pop('uid')
-            fetch_state()
-            return redirect(url_for('index'))
-
+        
         # Handle form request
         if request.method == 'POST':
             userEmail = request.form['userEmailInput']
@@ -257,7 +254,7 @@ def auth(type):
                 fetch_state()
                 supabase.auth.sign_out()
                 return redirect(url_for('index'))
-            else:
+            elif type == 'signin':
                 supabase.auth.sign_in_with_password(
                     {"email": userEmail, "password": userPassword})
                 session['uid'] = supabase.auth.get_session().user.id
@@ -265,6 +262,7 @@ def auth(type):
                 supabase.auth.sign_out()
                 return redirect(url_for('index'))
 
+        # Return page for those not logged in
         return render_template('auth.html',
                                activePage=type,
                                pageTitle=pageTitle,
