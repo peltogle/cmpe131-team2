@@ -9,7 +9,7 @@ supabase: Client = create_client("https://yxvtigsplpdppgwlktpn.supabase.co",
 
 @app.context_processor
 def inject_globals():
-    return {'green_salad_url': 'https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png', 'version': '0.2.2'}
+    return {'green_salad_url': 'https://yxvtigsplpdppgwlktpn.supabase.co/storage/v1/object/public/website_assets/website_images/green_salad.png', 'version': '0.2.3'}
 
 
 def returnActiveSession():
@@ -137,7 +137,6 @@ def signUp():
         else:
             supabase.auth.sign_up(
                 {"email": userEmail, "password": userPassword})
-            # TODO: Disable email verify
             return redirect(url_for('index'))
     pageDescription = "Welcome! Please fill in the information below to sign up."
     return render_template('signup.html',
@@ -257,6 +256,7 @@ class Cart:
     uuid = None
     items = {}
 
+
     """ 
     # start Class constructor
     #
@@ -271,7 +271,7 @@ class Cart:
         self.uuid = supabase.auth.get_session().user.id
         self.supaResponse = supabase.table('carts').select('*').eq('created_by', self.uuid).limit(1).execute()
         # Check if a cart entry exists for the user already
-        if False:  # self.supaResponse.count is None
+        if len(dict(self.supaResponse)["data"]) is 0:
             supabase.table('carts').insert({'created_by': self.uuid, 'items': {}}).execute()
         self.items = dict(supabase.table('carts').select('items').eq('created_by', self.uuid).limit(1).execute())["data"][0]["items"]
         self.calcData()
