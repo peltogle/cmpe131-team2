@@ -18,7 +18,31 @@ app.secret_key = SUPABASE_KEY
 # Create Supabase app instance
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Inject global variable into each page
+# -------------------------------------------------------------------------------------------------
+# TODO: handle bad input of forms (length, repeat user, wrong password, wrong email, etc)
+# TODO: add a banner that confirms user interaction or error (addition, can't add more, order etc)
+# TODO: fix sessions some more to make it better
+# TODO: order page (technically optional)
+
+
+@app.route('/orders')
+def orders():
+    if fetch_state():
+        userCart = Cart()
+        pageDescription = "Here are all the orders."
+        return render_template('orders.html',
+                               activePage="orders",
+                               pageTitle="All Orders",
+                               pageDescription=pageDescription,
+                               activeSession=fetch_state(),
+                               itemCount=userCart.itemCount)
+    else:
+        return redirect(url_for('index'))
+
+
+# -------------------------------------------------------------------------------------------------
+
+# Inject global variable into each pag
 
 
 @app.context_processor
@@ -29,22 +53,27 @@ def inject_globals():
 
 
 def fetch_state():
+    print(supabase.auth.get_session())
     if supabase.auth.get_session() is None:
+        print("case 1")
         # Logged out
         session['logged_in'] = False
         session['item_count'] = 0
     elif 'uid' in session and session['uid'] == supabase.auth.get_session().user.id:
+        print("case 2")
         # Logged in with session entry
         session['logged_in'] = True
         fetch_and_calc_session(session['uid'])
     elif 'uid' in session and session['uid'] != supabase.auth.get_session().user.id:
         # Logged in with session entry but different uid in session
+        print("case 3")
         session.clear()
         session['logged_in'] = True
         session['uid'] = supabase.auth.get_session().user.id
         fetch_and_calc_session(session['uid'])
     else:
         # Logged in without session entry
+        print("case 4")
         session['logged_in'] = True
         session['uid'] = supabase.auth.get_session().user.id
         fetch_and_calc_session(session['uid'])
@@ -351,31 +380,6 @@ def cart():
                                userItems=userItems)
     else:
         return redirect(url_for('index'))
-
-
-# -------------------------------------------------------------------------------------------------
-# TODO: handle bad input of forms (length, repeat user, wrong password, wrong email, etc)
-# TODO: add a banner that confirms user interaction or error (addition, can't add more, order etc)
-# TODO: fix sessions some more to make it better
-# TODO: order page (technically optional)
-
-
-@app.route('/orders')
-def orders():
-    if fetch_state():
-        userCart = Cart()
-        pageDescription = "Here are all the orders."
-        return render_template('orders.html',
-                               activePage="orders",
-                               pageTitle="All Orders",
-                               pageDescription=pageDescription,
-                               activeSession=fetch_state(),
-                               itemCount=userCart.itemCount)
-    else:
-        return redirect(url_for('index'))
-
-
-# -------------------------------------------------------------------------------------------------
 
 
 if __name__ == '__main__':

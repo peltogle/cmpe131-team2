@@ -36,10 +36,10 @@
             {% else %}
             <form method="post" class="text-center">
                 <div class="form-floating mb-3">
-                    <input type="number" oninput="handleInput(this)" class="form-control" placeholder="Quantity" min="1" max="{{ stock }}" name="quantityNeeded" required>
+                    <input type="number" oninput="handleInput(this)" class="form-control" placeholder="Quantity" step="1" min="1" max="{{ stock }}" name="quantityNeeded" required>
                     <label for="floatingInput">Quantity</label>
                 </div>
-                <input type="hidden" name="itemNeeded" value="{{ itemId }}"></input>
+                <input type="hidden" name="itemNeeded" value="{{ itemId }}" readonly></input>
                 <button class="btn w-100 btn-primary" type="submit">Add to cart</button>
             </form>
             {% endif %}
@@ -72,7 +72,7 @@
         <small class="text-body-secondary">{{ itemQuantity }} @ {{ itemWeight }} lb each</small>
         <br>
         <form method="post">
-            <input type="hidden" name="itemId" value="{{ itemId }}"></input>
+            <input type="hidden" name="itemId" value="{{ itemId }}" readonly></input>
             <small><a href="" class="link-danger" onclick="this.closest('form').submit();return false;">remove</a></small>
         </form>
     </div>
