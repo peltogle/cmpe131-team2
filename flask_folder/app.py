@@ -19,7 +19,6 @@ app.secret_key = SUPABASE_KEY
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # -------------------------------------------------------------------------------------------------
-# TODO: handle bad input of forms (length, repeat user, wrong password, wrong email, etc)
 # TODO: add a banner that confirms user interaction or error (addition, can't add more, order etc)
 
 
